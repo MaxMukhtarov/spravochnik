@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Section</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+        button, select {
+            margin: 10px 0;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .messages {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .messages li {
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .messages .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .messages .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h2>Edit Section: {{ object.section_name }}</h2>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <h3>Users in this Section</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Contact</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td><input type="checkbox" name="selected_users" value="{{ user.id }}"></td>
+                        <td>{{ user.full_name }}</td>
+                        <td>{{ user.mail_address|default_if_none:"N/A" }}</td>
+                        <td>{{ user.role }}</td>
+                        <td>{{ user.contact|default_if_none:"N/A" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5">No users in this section.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div>
+            <!-- <button type="submit" name="action" value="remove">Remove Selected Users</button> -->
+
+            <select name="target_section">
+                <option value="">Select Target Section</option>
+                {% for other_section in other_sections %}
+                    <option value="{{ other_section.id }}">{{ other_section.section_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" name="action" value="move">Move Selected Users</button>
+        </div>
+
+        <button type="submit">Save Changes</button>
+    </form>
+</body>
+</html>

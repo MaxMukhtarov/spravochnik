@@ -1,0 +1,11 @@
+<h1>Manage Sections</h1>
+<a href="{% url 'section_add' %}">Add Section</a>
+<ul>
+    {% for section in sections %}
+        <li>
+            {{ section.section_name }}
+            <a href="{% url 'section_edit' section.id %}">Edit</a>
+            <a href="{% url 'section_delete' section.id %}">Delete</a>
+        </li>
+    {% endfor %}
+</ul>

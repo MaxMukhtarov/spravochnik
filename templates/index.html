@@ -1,0 +1,214 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spravochnik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fefefe;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            background-color: #212640;
+            color: #fefefe;
+            padding: 20px;
+            margin: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .form-row label {
+            font-size: 16px;
+            color: #555;
+            margin-right: 10px;
+            flex-basis: 30%;
+        }
+        .form-row select, 
+        .form-row input[type="text"], 
+        .form-row button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            flex: 1;
+        }
+        .form-row select, 
+        .form-row button {
+            background-color: #e31e24;
+            color: #fefefe;
+            border: none;
+        }
+        .form-row select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            flex: 1;
+            background-color: #e31e24;
+            color: #fefefe;
+            border: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .form-row button {
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+        .form-row button:hover {
+            background-color: #c62828; 
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #212640;
+            color: #fefefe;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 30%;
+        }
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 30%;
+        }
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 10%;
+        }
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 30%;
+        }
+        .empty-message {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+        }
+
+        .user-name {
+            position: relative;
+            cursor: pointer;
+            white-space: nowrap; 
+        }
+
+        .user-name img {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: -100%;  
+            width: 90px;   
+            height: 120px; 
+            object-fit: contain;
+            border: 2px solid #949292;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            opacity: 0;  
+            transform: scale(0.5); 
+            transition: opacity 1s ease, transform 1s ease, left 0.8s ease; 
+        }
+
+        .user-name:hover img {
+            opacity: 1; 
+            transform: scale(1); 
+            left: -120px; 
+        }
+    </style>
+</head>
+<body>
+    <h1><img src="{% static 'img/logo.png' %}" alt="Poytaxtbank"></h1>
+
+    <div class="container">
+        <div class="form-row">
+            <form method="GET" action="" style="flex-basis: 50%;">
+                <label for="section">Filtrlash:</label>
+                <select id="section" name="section" onchange="this.form.submit()">
+                    <option value="">Barcha bo`lim</option>
+                    {% for section in all_sections %}
+                        <option value="{{ section.id }}" {% if section.id|stringformat:"s" == selected_section_id %}selected{% endif %}>
+                            {{ section.section_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <form method="GET" action="" style="flex-basis: 50%; display: flex; align-items: center;">
+                <label for="search" style="flex: 1;">Qidirish:</label>
+                <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="Ism sharifni to`liq yoki qisman kiriting">
+                <button type="submit">Qidiruv</button>
+            </form>
+        </div>
+        
+        {% if sections %}
+            {% for section, users in sections.items %}
+                {% if users %}
+                    <h2>{{ section.section_name }}</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ism sharif</th>
+                                <th>Lavozim</th>
+                                <th>Pochta adress</th>
+                                <th>Ichki raqam</th>
+                                <th>Mobil raqam</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td class="user-name">
+                                        <span>{{ user.full_name }}</span>
+                                        <img src="{% if user.image %}{{ user.image.url }}{% else %}{% static 'img/users/default.png' %}{% endif %}" alt="{{ user.full_name }}">
+                                    </td>
+                                    <td>{{ user.role|default_if_none:"" }}</td>
+                                    <td>{{ user.mail_address|default_if_none:"" }}</td>
+                                    <td>{{ user.contact|default_if_none:"" }}</td>
+                                    <td>{{ user.mobile|default_if_none:"" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>                        
+                    </table>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p class="empty-message">Hodimlar haqida ma'lumot yo`q!</p>
+        {% endif %}
+    </div>
+</body>
+</html>
